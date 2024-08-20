@@ -1,36 +1,43 @@
 import { CreateMedicineDto } from "./dto/create-med.dto";
 import { UpdateMedicineDto } from "./dto/update-med.dto";
 import { MedicineService } from "./medicine.services.";
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { RolesGuard } from '../auth/roles/roles.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { Role } from '../auth/roles/roles.enum';
 
 @Controller('/medicines')
-export class MedicineController{
-constructor(private medicineService:MedicineService){}
+@UseGuards(RolesGuard)
+export class MedicineController {
+  constructor(private medicineService: MedicineService) {}
 
-@Post()
-async create(@Body() CreateMedicineDto:any){
-    return this.medicineService.create(CreateMedicineDto)
-}
+  @Post()
+  @Roles(Role.Admin)
+  async create(@Body() createMedicineDto: CreateMedicineDto) {
+    return this.medicineService.create(createMedicineDto);
+  }
 
-@Get()
+  @Get()
+  @Roles(Role.Admin, Role.User)
   async findAll() {
     return this.medicineService.findAll();
   }
 
   @Get(':id')
+  @Roles(Role.Admin, Role.User)
   async findOne(@Param('id') id: number) {
     return this.medicineService.findOne(id);
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() UpdateMedicineDto: any) {
-    return this.medicineService.update(id, UpdateMedicineDto);
+  @Roles(Role.Admin)
+  async update(@Param('id') id: number, @Body() updateMedicineDto: UpdateMedicineDto) {
+    return this.medicineService.update(id, updateMedicineDto);
   }
 
   @Delete(':id')
+  @Roles(Role.Admin)
   async remove(@Param('id') id: number) {
     return this.medicineService.remove(id);
   }
-
-  
 }

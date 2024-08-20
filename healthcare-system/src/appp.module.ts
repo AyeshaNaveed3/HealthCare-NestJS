@@ -2,10 +2,11 @@ import { Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { User } from './auth/user.model'; 
 import { Patient } from './patients/patient.model'; 
-import { Usermodule } from "./auth/user.module";
+import { UserModule } from "./auth/user.module";
 import { PatientsModule } from "./patients/patients.module";
 import { Medicine } from "./Medicines/medicine.model";
 import { MedicineModule } from "./Medicines/medicine.module";
+
 @Module({
     imports:[
         SequelizeModule.forRoot({
@@ -20,7 +21,7 @@ import { MedicineModule } from "./Medicines/medicine.module";
             synchronize: true,
         
         }),
-        Usermodule,
+        UserModule,
         PatientsModule,
         MedicineModule
         

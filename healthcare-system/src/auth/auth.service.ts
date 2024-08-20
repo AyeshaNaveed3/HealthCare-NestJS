@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken';
 import { User } from './user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -12,27 +13,31 @@ export class AuthService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
+    private jwtservice: JwtService
   ) {}
 
   generateToken(user: any): string {
-    return jwt.sign(user, this.jwtSecret, { expiresIn: '1h' });
+    return this.jwtservice.sign(user); // Use JwtService to sign the token
   }
 
   verifyToken(token: string): any {
-    return jwt.verify(token, this.jwtSecret);
+    return this.jwtservice.verify(token); // Use JwtService to verify the token
   }
 
   async signup(createUserDto: CreateUserDto): Promise<User> {
     return this.userModel.create(createUserDto);
   }
 
-  async login(email: string, password: string): Promise<{ token: string } | null> {
+  async login(email: string, password: string): Promise<{ message: string; token?: string }> {
     const user = await this.userModel.findOne({ where: { email } });
+
     if (user && user.password === password) {
-      const token = this.generateToken({ id: user.id, email: user.email });
-      return { token };
+      const payload = { email: user.email, sub: user.id, roles: user.role }; // Include roles in payload
+      const token = this.generateToken(payload);
+      return { message: 'Login successful', token };
     }
-    return null;
+
+    return { message: 'Invalid credentials' };
   }
 
   async findAll(): Promise<User[]> {
